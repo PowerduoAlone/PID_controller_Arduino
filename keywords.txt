@@ -1,0 +1,6 @@
+PID KEYWORD1
+begin KEYWORD2
+set_constants KEYWORD2
+set_setpoint KEYWORD2
+determine_time KEYWORD2
+calculate_controller_output KEYWORD2
