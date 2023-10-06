@@ -15,52 +15,72 @@ enum solder_state {
 
 #define time_between_decisions 500  //ms
 #define second 1000                 //ms
-#define preheat_step 3 * time_between_decisions / second
+#define preheat_step float(3) * time_between_decisions / second
 #define preheat_limit 150
 #define wait_time_soak second / time_between_decisions * 90
-#define reflow_step 2 * time_between_decisions / second
+#define reflow_step float(2) * time_between_decisions / second
 #define reflow_limit 245
 #define plateau_time 40  //from 40 to 80 possible
 #define wait_time_plateau second / time_between_decisions* plateau_time
-#define cooling_step -4 * time_between_decisions / second¨
+#define cooling_step float(-4) * time_between_decisions / second¨
 #define cooling_limit 35
 
-solder_state state = inactive_state;
-PID_arduino PID_controller(1, 0.1, 0.2, true);
+solder_state state = preheat_state;
+PID_arduino PID_controller(1, 0, 0, true);
 bool heater_relais = false;
 uint8_t NTC_pin = A0;
 uint8_t relais_pin = 2;
 uint8_t button_pin = 3;
 int NTC_voltage = 0;
 float temperature = 24.0;
-float desired_temperature = 24.0;
+float desired_temperature = 20.0;
 
 unsigned long run_time = 0;
 int time_counter = 0;
 bool running = false;
+bool handle_state = false;
+int counter = 0;
+
+ISR(TIMER1_OVF_vect)
+{
+  TCNT1 =99820;
+  counter +=1;
+  if(counter >= 1){
+    handle_state = true;
+    counter = 0;
+  }
+}
 
 void setup() {
   Serial.begin(9600);
   pinMode(relais_pin, OUTPUT);
   pinMode(button_pin, INPUT);
+  noInterrupts();
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1 =99820;
+  TCCR1B |= (1 << CS12);    // 256 prescaler
+  TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
+  interrupts();
   PID_controller.begin(desired_temperature);
 }
 
 void loop() {
-  if ((run_time = millis()) % time_between_decisions == 0) {  //check if this is not skipped sometimes
-    Serial.print("run time is: ");
-    Serial.println(run_time);
+  if (handle_state) {
+    //Serial.print("run time is: ");
+    Serial.println(millis());
     state_machine(state);
     if (!running) {
       Serial.println("Ready");
     }
     PID_controller.set_setpoint(desired_temperature);
-    Serial.print("Temperature is: ");
-    Serial.print(temperature);
-    Serial.print(" and desired Temperature is: ");
+    //Serial.print("Temperature is: ");
+    Serial.println(temperature);
+    //Serial.print("Desired Temperature is: ");
     Serial.println(desired_temperature);
-    Serial.print("The state of the relais is: ");
-    Serial.println(heater_relais);
+    //Serial.print("The state of the relais is: ");
+    Serial.println(heater_relais, DEC);
+    handle_state = false;
   }
   //measure temperature;
   heater_relais = PID_controller.calculate_controller_output_bool(temperature);
@@ -97,7 +117,7 @@ void preheat() {
   if (temperature >= preheat_limit) {
     state = soak_state;
   }
-  if (desired_temperature <= preheat_limit) {
+  if (desired_temperature < preheat_limit) {
     desired_temperature += preheat_step;
   }
 }
@@ -115,7 +135,7 @@ void reflow() {
   if (temperature >= reflow_limit) {
     state = plateau_state;
   }
-  if (desired_temperature <= reflow_limit) {
+  if (desired_temperature < reflow_limit) {
     desired_temperature += reflow_step;
   }
 }
@@ -134,7 +154,7 @@ void cooling() {
     state = inactive_state;
     running = false;
   }
-  if (desired_temperature <= cooling_limit) {
+  if (desired_temperature < cooling_limit) {
     desired_temperature -= reflow_step;
   }
 }

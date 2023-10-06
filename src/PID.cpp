@@ -5,6 +5,7 @@
 */
 
 #include "PID.h"
+#include "Arduino.h"
 
 PID::PID(float proportional_Constant=1, float integral_Constant=0, float derivative_Constant=0, bool boolean_Controller=true){
     this->kp = proportional_Constant;
@@ -35,10 +36,11 @@ void PID::set_setpoint(float setpoint){
 
 float PID::calculate(float measured_Value){
     unsigned long current_timepoint = this->determine_time();
+    unsigned long time_passed = (current_timepoint - this->timepoint);
     float current_error = this->setpoint - measured_Value;
     float P = this->kp*current_error;
-    float I = this->ki*((this->error*(current_timepoint-this->timepoint))+((current_error-this->error)*(current_timepoint-this->timepoint)/2));
-    float D = this->kd*((current_error-this->error)/(current_timepoint-this->timepoint));
+    float I = this->ki*((this->error*(time_passed))+((current_error-this->error)*(time_passed)/2));
+    float D = this->kd*((current_error-this->error)/(time_passed));
     float sum = P + I + D;
     this->timepoint = current_timepoint;
     this->error = current_error;
