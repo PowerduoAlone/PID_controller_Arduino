@@ -33,7 +33,7 @@ void PID::set_setpoint(float setpoint){
     this->setpoint = setpoint;
 }
 
-float PID::calculate_controller_output(float measured_Value){
+float PID::calculate(float measured_Value){
     unsigned long current_timepoint = this->determine_time();
     float current_error = this->setpoint - measured_Value;
     float P = this->kp*current_error;
@@ -43,4 +43,21 @@ float PID::calculate_controller_output(float measured_Value){
     this->timepoint = current_timepoint;
     this->error = current_error;
     return sum;
+}
+
+float PID::calculate_controller_output_float(float measured_Value){
+    float output = this->calculate(measured_Value);
+    return output;
+}
+
+bool PID::calculate_controller_output_bool(float measured_Value){
+    bool output_state = false;
+    float output = this->calculate(measured_Value);
+    if(output >= 0){
+        output_state = true;
+    }
+    else{
+        output_state = false;
+    }
+    return output_state;
 }

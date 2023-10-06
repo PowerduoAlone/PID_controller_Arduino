@@ -14,10 +14,11 @@ class PID
       void begin(float setpoint);
       void set_constants(float proportional_Constant, float integral_Constant, float derivative_Constant, bool boolean_Controller);
       void set_setpoint(float setpoint);
-      float calculate_controller_output(float measured_Value);
-
+      float calculate_controller_output_float(float measured_Value);
+      bool calculate_controller_output_bool(float measured_Value);
   private:
       virtual unsigned long determine_time();
+      float calculate(float measured_Value);
       float kp = 1.0; //proportional constant
       float ki = 1.0; //integral constant
       float kd = 1.0; //derivative constant
