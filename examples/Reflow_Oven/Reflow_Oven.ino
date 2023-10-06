@@ -48,13 +48,18 @@ void setup() {
 
 void loop() {
   if ((run_time = millis()) % time_between_decisions == 0) {  //check if this is not skipped sometimes
+    Serial.print("run time is: ");
     Serial.println(run_time);
     state_machine(state);
     if (!running) {
       Serial.println("Ready");
     }
     PID_controller.set_setpoint(desired_temperature);
-    Serial.println(temperature);
+    Serial.print("Temperature is: ");
+    Serial.print(temperature);
+    Serial.print(" and desired Temperature is: ");
+    Serial.println(desired_temperature);
+    Serial.print("The state of the relais is: ");
     Serial.println(heater_relais);
   }
   //measure temperature;
