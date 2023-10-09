@@ -10,6 +10,7 @@
 class PID
 {
   public:
+      PID();
       PID(float proportional_Constant, float integral_Constant, float derivative_Constant, bool boolean_Controller);
       void begin(float setpoint);
       void set_constants(float proportional_Constant, float integral_Constant, float derivative_Constant, bool boolean_Controller);

@@ -6,6 +6,14 @@
 
 #include "PID.h"
 
+PID::PID(){
+    this->kp = 1;
+    this->ki = 0;
+    this->kd = 0;
+    this->controller_Type = true;
+}
+
+
 PID::PID(float proportional_Constant=1, float integral_Constant=0, float derivative_Constant=0, bool boolean_Controller=true){
     this->kp = proportional_Constant;
     this->ki = integral_Constant;
