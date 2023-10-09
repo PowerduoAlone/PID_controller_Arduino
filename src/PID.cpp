@@ -5,7 +5,6 @@
 */
 
 #include "PID.h"
-#include "Arduino.h"
 
 PID::PID(float proportional_Constant=1, float integral_Constant=0, float derivative_Constant=0, bool boolean_Controller=true){
     this->kp = proportional_Constant;
